@@ -2,10 +2,10 @@ import csv
 import os
 
 
-files_directory = './data'
-
-
-def filter_data_conditions(row) -> bool:
+def is_candidate_aplicable(row) -> bool:
+    '''
+    Критерии оценки кандидата
+    '''
     if int(row['age']) >= 20 and int(row['age']) <= 59:
         if int(row['height']) >= 150 and int(row['height']) <= 190:
             if int(row['weight']) >= 50 and int(row['weight']) <= 90:
@@ -17,6 +17,9 @@ def filter_data_conditions(row) -> bool:
 
 
 class Parser:
+    '''
+    Объект обрабатывающий файлы с данными кандиатов
+    '''
     def __init__(self,
                  filepath: str) -> None:
         self.raw_data = []
@@ -41,13 +44,24 @@ class Parser:
                                             int(candidate['age'])])
         self.prioritized = self.normalize_data(self.prioritized)
         self.candidates = self.normalize_data(self.candidates)
-        self.write_data()
+        try:
+            self.write_data()
+        except PermissionError as e:
+            print(f'{e}: Не удалось записать данные в файл')
+        finally:
+            print('Данные записаны в файл')
 
     def get_files(self) -> None:
+        '''
+        Получение списка всех файлов в директории
+        '''
         self.files = [file for file in os.listdir(self.filepath)
                       if file.endswith('.csv')]
 
     def read_data(self) -> None:
+        '''
+        Чтение данных из файла
+        '''
         for file in self.files:
             if not file == 'result.csv':
                 filepath = os.path.join(self.filepath, file)
@@ -56,10 +70,16 @@ class Parser:
                     self.raw_data += [row for row in reader]
 
     def filter_data(self) -> None:
+        '''
+        Филтрация кандидатов
+        '''
         self.raw_data = [data_dict for data_dict in self.raw_data
-                         if filter_data_conditions(data_dict)]
+                         if is_candidate_aplicable(data_dict)]
 
     def normalize_data(self, data: list[dict]) -> None:
+        '''
+        Нормализация данных
+        '''
         result = []
         for dict in data:
             result.append({
@@ -74,6 +94,9 @@ class Parser:
         return result
 
     def sort_data(self) -> None:
+        '''
+        Сортировка данных
+        '''
         for person in self.raw_data:
             if int(person['age']) >= 27 and int(person['age']) <= 37:
                 self.prioritized.append(person)
@@ -81,6 +104,9 @@ class Parser:
                 self.candidates.append(person)
 
     def write_data(self) -> None:
+        '''
+        Запись данных в файл с результатом
+        '''
         filepath = os.path.join(self.filepath, 'result.csv')
         fieldnames = ['id', 'name', 'surname',
                       'height', 'weight', 'education',
@@ -94,6 +120,6 @@ class Parser:
             writer.writerows(data)
 
 
-if not files_directory:
-    files_directory = input('Введите путь к папке с данными: ')
+files_directory = input('Введите путь к папке с данными: ')
+
 p = Parser(files_directory)
