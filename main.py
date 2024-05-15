@@ -30,20 +30,22 @@ class Parser:
         self.filter_data()
         self.sort_data()
         self.prioritized = sorted(self.prioritized,
-                                  key=lambda x:[
-                                    x['name'],
-                                    x['surname']
+                                  key=lambda candidate: [
+                                             candidate['name'],
+                                             candidate['surname']
                                   ])
         self.candidates = sorted(self.candidates,
-                                 key=lambda x:[x['name'],
-                                               x['surname'],
-                                               int(x['age'])])
+                                 key=lambda candidate: [
+                                            candidate['name'],
+                                            candidate['surname'],
+                                            int(candidate['age'])])
         self.prioritized = self.normalize_data(self.prioritized)
         self.candidates = self.normalize_data(self.candidates)
         self.write_data()
 
     def get_files(self) -> None:
-        self.files = [file for file in os.listdir(self.filepath) if file.endswith('.csv')]
+        self.files = [file for file in os.listdir(self.filepath)
+                      if file.endswith('.csv')]
 
     def read_data(self) -> None:
         for file in self.files:
@@ -54,8 +56,9 @@ class Parser:
                     self.raw_data += [row for row in reader]
 
     def filter_data(self) -> None:
-        self.raw_data = [data_dict for data_dict in self.raw_data if filter_data_conditions(data_dict)]
-    
+        self.raw_data = [data_dict for data_dict in self.raw_data
+                         if filter_data_conditions(data_dict)]
+
     def normalize_data(self, data: list[dict]) -> None:
         result = []
         for dict in data:
@@ -69,14 +72,14 @@ class Parser:
                 'age': dict['age']
             })
         return result
-    
+
     def sort_data(self) -> None:
         for person in self.raw_data:
             if int(person['age']) >= 27 and int(person['age']) <= 37:
                 self.prioritized.append(person)
             else:
                 self.candidates.append(person)
-    
+
     def write_data(self) -> None:
         filepath = os.path.join(self.filepath, 'result.csv')
         fieldnames = ['id', 'name', 'surname',
@@ -85,7 +88,7 @@ class Parser:
         with open(filepath, 'w+') as f:
             writer = csv.DictWriter(f, fieldnames,
                                     delimiter='#')
-            data =  self.prioritized + self.candidates 
+            data = self.prioritized + self.candidates
             for idx, candidate in enumerate(data, start=1):
                 candidate['id'] = idx
             writer.writerows(data)
