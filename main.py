@@ -49,7 +49,7 @@ class Parser:
         except PermissionError as e:
             print(f'{e}: Не удалось записать данные в файл')
         finally:
-            print('Данные записаны в файл')
+            print('Данные записаны в файл result.csv')
 
     def get_files(self) -> None:
         '''
